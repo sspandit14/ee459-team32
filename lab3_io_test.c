@@ -1,0 +1,45 @@
+#include <avr/io.h>
+#include <util/delay.h>
+
+int main(void) {
+    // set PD0 as trigger pin
+    // make every pin an output
+    DDRB = 0xFF;
+    DDRC = 0xFF;
+    DDRD = 0xFF;
+
+    // set all outputs to 0
+    PORTB = 0x00;
+    PORTC = 0x00;
+    PORTD = 0x00;
+
+    while (1) {
+        // trigger
+        PORTD |= (1 << PD0);
+        _delay_ms(1);
+        PORTD &= ~(1 << PD0);
+        _delay_ms(1);
+
+        // flip every other bit
+        for (int i = 0; i <= 5; ++i) {
+            PORTB |= (1 << i);
+            _delay_ms(1);
+            PORTB &= ~(1 << i);
+            _delay_ms(1);
+        }
+
+        for (int i = 0; i <= 5; ++i) {
+            PORTC |= (1 << i);
+            _delay_ms(1);
+            PORTC &= ~(1 << i);
+            _delay_ms(1);
+        }
+
+        for (int i = 1; i <= 7; ++i) {
+            PORTD |= (1 << i);
+            _delay_ms(1);
+            PORTD &= ~(1 << i);
+            _delay_ms(1);
+        }
+    }
+}

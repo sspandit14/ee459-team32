@@ -1,0 +1,3 @@
+avr-gcc -Wall -Os -DF_CPU=9830400 -mmcu=atmega328p -o NAME.elf NAME.c
+avr-objcopy -O ihex NAME.elf NAME.hex
+avrdude -c usbtiny -p m328p -U flash:w:NAME.hex
