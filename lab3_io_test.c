@@ -13,6 +13,8 @@ int main(void) {
     PORTC = 0x00;
     PORTD = 0x00;
 
+    int i = 0;
+
     while (1) {
         // trigger
         PORTD |= (1 << PD0);
@@ -21,21 +23,26 @@ int main(void) {
         _delay_ms(1);
 
         // flip every other bit
-        for (int i = 0; i <= 5; ++i) {
+        for (i = 0; i <= 5; ++i) {
             PORTB |= (1 << i);
             _delay_ms(1);
             PORTB &= ~(1 << i);
             _delay_ms(1);
         }
 
-        for (int i = 0; i <= 5; ++i) {
+        PORTB |= (1 << PB7);
+        _delay_ms(1);
+        PORTB &= ~(1 << PB7);
+        _delay_ms(1);
+
+        for (i = 0; i <= 5; ++i) {
             PORTC |= (1 << i);
             _delay_ms(1);
             PORTC &= ~(1 << i);
             _delay_ms(1);
         }
 
-        for (int i = 1; i <= 7; ++i) {
+        for (i = 1; i <= 7; ++i) {
             PORTD |= (1 << i);
             _delay_ms(1);
             PORTD &= ~(1 << i);
