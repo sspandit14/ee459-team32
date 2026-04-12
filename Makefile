@@ -1,7 +1,7 @@
 DEVICE     = atmega328p
 CLOCK      = 9830400
 PROGRAMMER = -c usbtiny -P usb
-SOURCES    = analogue_sensor_read.c
+SOURCES    = midi_signal_gen_test.c
 DEBUG_SOURCES = input_LED_test.c
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
 BUILD ?= debug
