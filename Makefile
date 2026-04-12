@@ -1,8 +1,20 @@
 DEVICE     = atmega328p
 CLOCK      = 9830400
 PROGRAMMER = -c usbtiny -P usb
-OBJECTS    = program_flash_test.o
+SOURCES    = analogue_sensor_read.c
+DEBUG_SOURCES = input_LED_test.c
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
+BUILD ?= debug
+
+ifeq ($(BUILD), debug)
+	SRCS = $(DEBUG_SOURCES)
+	HEX = debug.hex
+else
+	SRCS = $(SOURCES)
+	HEX = main.hex
+endif
+
+OBJECTS = $(SRCS:.c=.o)
 
 # Fuse Low Byte = 0xe0   Fuse High Byte = 0xd9   Fuse Extended Byte = 0xff
 # Bit 7: CKDIV8  = 1     Bit 7: RSTDISBL  = 1    Bit 7:
@@ -26,7 +38,7 @@ AVRDUDE = avrdude $(PROGRAMMER) -p $(DEVICE)
 COMPILE = avr-gcc -Wall -Os -DF_CPU=$(CLOCK) -mmcu=$(DEVICE)
 
 # symbolic targets:
-all:	main.hex
+all: $(HEX)
 
 .c.o:
 	$(COMPILE) -c $< -o $@
@@ -42,7 +54,7 @@ all:	main.hex
 	$(COMPILE) -S $< -o $@
 
 flash:	all
-	$(AVRDUDE) -U flash:w:main.hex:i
+	$(AVRDUDE) -U flash:w:$(HEX):i
 
 fuse:
 	$(AVRDUDE) $(FUSES)
@@ -52,25 +64,25 @@ install: flash fuse
 
 # if you use a bootloader, change the command below appropriately:
 load: all
-	bootloadHID main.hex
+	bootloadHID $(HEX)
 
 clean:
-	rm -f main.hex main.elf $(OBJECTS)
+	rm -f *.hex *.elf *.o
 
 # file targets:
-main.elf: $(OBJECTS)
-	$(COMPILE) -o main.elf $(OBJECTS)
+$(HEX:.hex=.elf): $(OBJECTS)
+	$(COMPILE) -o $@ $(OBJECTS)
 
-main.hex: main.elf
-	rm -f main.hex
-	avr-objcopy -j .text -j .data -O ihex main.elf main.hex
-	avr-size --format=avr --mcu=$(DEVICE) main.elf
+$(HEX): $(HEX:.hex=.elf)
+	rm -f $@
+	avr-objcopy -j .text -j .data -O ihex $< $@
+	avr-size --format=avr --mcu=$(DEVICE) $<
 # If you have an EEPROM section, you must also create a hex file for the
 # EEPROM and add it to the "flash" target.
 
 # Targets for code debugging and analysis:
-disasm:	main.elf
-	avr-objdump -d main.elf
+disasm: $(HEX:.hex=.elf)
+	avr-objdump -d $<
 
 cpp:
-	$(COMPILE) -E main.c
+	$(COMPILE) -E $(word 1,$(SRCS))
