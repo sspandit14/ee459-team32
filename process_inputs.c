@@ -1,1 +1,0 @@
-// take analogue sensor input values and process them (filter and process biometric inputs then map to MIDI CC message)

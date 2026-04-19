@@ -3,14 +3,14 @@
 #include <util/delay.h>
 
 #define PRESSURE_CH 1
-#define EMG_CH 2
-#define SKIN_CH 3
+#define SKIN_CH 2
+#define EMG_CH 3
 #define PULSE_CH 4
 
-#define PRESSURE_LED PD5
+#define PRESSURE_LED PB7
+#define SKIN_LED PD5
 #define EMG_LED PD6
-#define SKIN_LED PD7
-#define PULSE_LED PB0
+#define PULSE_LED PD7
 
 uint16_t get_adc(uint8_t channel) {
     // ADMUX = (channel << MUX0);
