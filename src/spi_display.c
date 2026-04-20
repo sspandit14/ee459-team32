@@ -1,9 +1,10 @@
 // deals with displaying information on the SPI Display
-
+#include "font.h"
 #include "spi_display.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define SPI_CLK PB5
 #define SPI_MOSI PB3
@@ -21,7 +22,6 @@
 #define GREEN 0x07E0
 #define BLUE  0x001F
 
-// chip select is low active (double check)
 static void cs_low(void) {
     SPI_PORT &= ~(1 << CS);
 }
@@ -43,7 +43,7 @@ static void rst_low(void) {
 }
 
 static void rst_high(void) {
-    SPI_PORT |= (1 << rst);
+    SPI_PORT |= (1 << RST);
 }
 
 static void spi_tx(uint8_t data) {
@@ -67,7 +67,7 @@ static void display_write_data(uint8_t data) {
 
 static void display_write_data16(uint16_t data) {
     display_write_data((uint8_t)(data >> 8));
-    display_write_date((uint8_t)(data & 0xFF));
+    display_write_data((uint8_t)(data & 0xFF));
 }
 
 static void display_reset(void) {
@@ -79,8 +79,8 @@ static void display_reset(void) {
 
 void spi_init(void) {
     SPI_DDR |= (1 << SPI_CLK) | (1 << SPI_MOSI) | (1 << CS) | (1 << DC) | (1 << RST);
-    SPI_PORT |= (1 << CS);
-    SPCR |= (1 << SPE) | (1 << MSTR);
+    SPI_PORT |= (1 << CS) | (1 << DC) | (1 << RST);
+    SPCR = (1 << SPE) | (1 << MSTR);
     SPSR = 0;
 }
 
@@ -105,7 +105,7 @@ static void display_set_addr_window(uint16_t x0, uint16_t y0, uint16_t x1, uint1
     spi_tx((uint8_t)(y1 & 0xFF));
     cs_high();
 
-    // write contents of memory
+    // memory write
     display_write_command(0x2C);
 }
 
@@ -157,7 +157,31 @@ void spi_display_draw_pixel(uint16_t x, uint16_t y, uint16_t colour) {
 }
 
 void spi_display_draw_char(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t bg) {
-    // TODO add font stuff
+    const uint8_t* glyph = get_glyph(c);
+
+    // 5x7 font window + 1 char spacing
+    display_set_addr_window(x, y, x + F_WIDTH, y + F_HEIGHT - 1);
+
+    cs_low();
+    dc_high();
+
+    for (uint8_t col = 0; col < F_WIDTH; ++col) {
+        uint8_t bits = glyph[col];
+
+        for (uint8_t row = 0; row < F_HEIGHT; ++row) {
+            uint16_t colour = (bits & (1 << row)) ? fg : bg;
+            spi_tx((uint8_t)(colour >> 8));
+            spi_tx((uint8_t)(colour & 0xFF));
+        }
+    }
+
+    // space characters by one column
+    for (uint8_t row = 0; row < F_HEIGHT; ++row) {
+        spi_tx((uint8_t)(bg >> 8));
+        spi_tx((uint8_t)(bg & 0xFF));
+    }
+
+    cs_high();
 }
 
 void spi_display_draw_string(uint16_t x, uint16_t y, const char *s, uint16_t fg, uint16_t bg) {
@@ -172,12 +196,10 @@ static void draw_label_value(uint16_t y, const char *label, uint16_t value, uint
     char buf[20];
 
     spi_display_draw_string(0, y, label, fg, BLACK);
+    spi_display_draw_string(72, y, ": ", fg, BLACK);
 
-    buf[0] = ':';
-    buf[1] = ' ';
-    buf[2] = '\0';
-
-    spi_display_draw_string(72, y, buf, fg, BLACK);
+    utoa(value, buf, 10);
+    spi_display_draw_string(90, y, buf, fg, BLACK);
 }
 
 void spi_display_draw_raw_screen(const screen_state_info *s) {
@@ -188,7 +210,7 @@ void spi_display_draw_raw_screen(const screen_state_info *s) {
 }
 
 void spi_display_draw_midi_screen(const screen_state_info *s) {
-    spi_display_clear(COLOR_BLACK);
+    spi_display_clear(BLACK);
     spi_display_draw_string(0, 0, "MIDI VALUES", WHITE, BLUE);
 
     // TODO: add actual values and formatting
