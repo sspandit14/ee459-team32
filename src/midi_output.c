@@ -53,8 +53,9 @@ MIDI_Message get_MIDI_message(int sensor, int val) {
     return msg;
 }
 
-void send_MIDI(MIDI_Message* msg) {
-    for (int i = 0; i < msg->length; ++i) {
+void send_MIDI(const MIDI_Message* msg) {
+    int i;
+    for (i = 0; i < msg->length; ++i) {
         send_UART(msg->data[i]);
     }
 }

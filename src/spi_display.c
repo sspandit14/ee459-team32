@@ -138,7 +138,9 @@ void spi_display_clear(uint16_t colour) {
 
     cs_low();
     dc_high();
-    for (uint32_t i = 0; i < (320UL * 172UL); i++) {
+
+    uint32_t i;
+    for (i = 0; i < (320UL * 172UL); i++) {
         spi_tx((uint8_t)(colour >> 8));
         spi_tx((uint8_t)(colour & 0xFF));
     }
@@ -165,10 +167,12 @@ void spi_display_draw_char(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t
     cs_low();
     dc_high();
 
-    for (uint8_t col = 0; col < F_WIDTH; ++col) {
+    uint8_t col;
+    uint8_t row;
+    for (col = 0; col < F_WIDTH; ++col) {
         uint8_t bits = glyph[col];
 
-        for (uint8_t row = 0; row < F_HEIGHT; ++row) {
+        for (row = 0; row < F_HEIGHT; ++row) {
             uint16_t colour = (bits & (1 << row)) ? fg : bg;
             spi_tx((uint8_t)(colour >> 8));
             spi_tx((uint8_t)(colour & 0xFF));
@@ -176,7 +180,7 @@ void spi_display_draw_char(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t
     }
 
     // space characters by one column
-    for (uint8_t row = 0; row < F_HEIGHT; ++row) {
+    for (row = 0; row < F_HEIGHT; ++row) {
         spi_tx((uint8_t)(bg >> 8));
         spi_tx((uint8_t)(bg & 0xFF));
     }
@@ -184,7 +188,7 @@ void spi_display_draw_char(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t
     cs_high();
 }
 
-void spi_display_draw_string(uint16_t x, uint16_t y, const char *s, uint16_t fg, uint16_t bg) {
+void spi_display_draw_string(uint16_t x, uint16_t y, const char* s, uint16_t fg, uint16_t bg) {
     while (*s) {
         spi_display_draw_char(x, y, *s, fg, bg);
         x += 6;   // 5x7 font and spacing
@@ -192,33 +196,57 @@ void spi_display_draw_string(uint16_t x, uint16_t y, const char *s, uint16_t fg,
     }
 }
 
-static void draw_label_value(uint16_t y, const char *label, uint16_t value, uint16_t fg) {
+static void draw_label_value(uint16_t y, const char* label, uint16_t value, uint16_t fg, uint16_t bg) {
     char buf[20];
 
-    spi_display_draw_string(0, y, label, fg, BLACK);
-    spi_display_draw_string(72, y, ": ", fg, BLACK);
+    spi_display_draw_string(0, y, label, fg, bg);
+    spi_display_draw_string(72, y, ": ", fg, bg);
 
     utoa(value, buf, 10);
-    spi_display_draw_string(90, y, buf, fg, BLACK);
+    spi_display_draw_string(90, y, buf, fg, bg);
 }
 
-void spi_display_draw_raw_screen(const screen_state_info *s) {
+void spi_display_draw_raw(const ScreenInfo* s) {
+    // barebones output of raw sensor values
     spi_display_clear(BLACK);
-    spi_display_draw_string(0, 0,  "RAW VALUES", WHITE, BLACK);
-
-    // TODO: add actual values and formatting
+    uint16_t y = 0;
+    spi_display_draw_string(0, y, "RAW VALUES:", WHITE, BLACK);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PULSE", s->pulse_raw, WHITE, BLACK);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PRESSURE", s->pressure_raw, WHITE, BLACK);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "EMG", s->emg_raw, WHITE, BLACK);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "GSR", s->gsr_raw, WHITE, BLACK);
 }
 
-void spi_display_draw_midi_screen(const screen_state_info *s) {
-    spi_display_clear(BLACK);
-    spi_display_draw_string(0, 0, "MIDI VALUES", WHITE, BLUE);
-
-    // TODO: add actual values and formatting
+void spi_display_draw_midi(const ScreenInfo* s) {
+    // barebones output of generated midi messages
+    spi_display_clear(BLUE);
+    uint16_t y = 0;
+    spi_display_draw_string(0, y, "MIDI VALUES:", WHITE, BLUE);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PULSE", s->pulse_midi, WHITE, BLUE);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PRESSURE", s->pressure_midi, WHITE, BLUE);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "EMG", s->emg_midi, WHITE, BLUE);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "GSR", s->gsr_midi, WHITE, BLUE);
 }
 
-void spi_display_draw_status_screen(const screen_state_info *s) {
-    spi_display_clear(BLACK);
-    spi_display_draw_string(0, 0, "BIOMETRICS", WHITE, GREEN);
-
-    // TODO: add actual values and formatting
+void spi_display_draw_biometrics(const ScreenInfo* s) {
+    // barebones output of biometric readings
+    spi_display_clear(GREEN);
+    uint16_t y = 0;
+    spi_display_draw_string(0, y, "BIOMETRICS:", WHITE, GREEN);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PULSE", s->pulse_proc, WHITE, GREEN);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "PRESSURE", s->pressure_proc, WHITE, GREEN);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "EMG", s->emg_proc, WHITE, GREEN);
+    y += F_HEIGHT + 1;
+    draw_label_value(y, "GSR", s->gsr_proc, WHITE, GREEN);
 }

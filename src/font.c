@@ -44,7 +44,7 @@ static const uint8_t glyph_X[5] = {0x63, 0x14, 0x08, 0x14, 0x63};
 static const uint8_t glyph_Y[5] = {0x07, 0x08, 0x70, 0x08, 0x07};
 static const uint8_t glyph_Z[5] = {0x61, 0x51, 0x49, 0x45, 0x43};
 
-const uint8_t *font_get_glyph(char c) {
+const uint8_t* get_glyph(char c) {
     switch (c) {
         case ' ': return glyph_space;
         case ':': return glyph_colon;

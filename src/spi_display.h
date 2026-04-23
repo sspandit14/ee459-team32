@@ -10,7 +10,7 @@ typedef enum {
     Raw = 0,
     Biometrics = 1,
     MIDI = 2
-} screen_state;
+} ScreenState;
 
 typedef struct {
     // raw inputs
@@ -30,7 +30,7 @@ typedef struct {
     uint8_t pressure_midi;
     uint8_t emg_midi;
     uint8_t gsr_midi;
-} screen_state_info;
+} ScreenInfo;
 
 void spi_init(void);
 void spi_display_init(void);
@@ -40,8 +40,8 @@ void spi_display_draw_pixel(uint16_t x, uint16_t y, uint16_t colour);
 void spi_display_draw_char(uint16_t x, uint16_t y, char c, uint16_t fg, uint16_t bg);
 void spi_display_draw_string(uint16_t x, uint16_t y, const char* s, uint16_t fg, uint16_t bg);
 
-void spi_display_draw_raw(const screen_state_info* s_info);
-void spi_display_draw_biometrics(const screen_state_info* s_info);
-void spi_display_draw_midi(const screen_state_info* s_info);
+void spi_display_draw_raw(const ScreenInfo* s_info);
+void spi_display_draw_biometrics(const ScreenInfo* s_info);
+void spi_display_draw_midi(const ScreenInfo* s_info);
 
 #endif

@@ -1,10 +1,10 @@
 DEVICE     = atmega328p
 CLOCK      = 9830400
 PROGRAMMER = -c usbtiny -P usb
-SOURCES    = midi_signal_gen_test.c
-DEBUG_SOURCES = input_LED_test.c
+SOURCES    = $(wildcard src/*.c)
+DEBUG_SOURCES = debug/midi_signal_gen_test.c
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
-BUILD ?= debug
+BUILD ?= release
 
 ifeq ($(BUILD), debug)
 	SRCS = $(DEBUG_SOURCES)
