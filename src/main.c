@@ -14,6 +14,9 @@
 #define MIN_VALID_SENSOR_VAL 100
 #define MAX_VALID_SENSOR_VAL 1000
 
+#define PULSE_HIGH 600
+#define PULSE_LOW 400
+
 #define SENSOR_READ_MS 10
 #define DISPLAY_UPDATE_MS 100
 #define MIDI_UPDATE_MS 10
@@ -25,6 +28,14 @@ volatile uint32_t ms_counter = 0;
 static uint32_t last_sensor_read = 0;
 static uint32_t last_display_update = 0;
 static uint32_t last_midi_update = 0;
+
+static uint32_t last_pulse_time = 0;
+static uint32_t midi_clk_spacing_ms = 0; // time between MIDI clock messages
+
+static uint16_t last_pulse_val = 0;
+static uint16_t bpm = 60;
+
+static uint32_t last_clock_time = 0;
 
 static void timer1_init(void) {
     // Clear Timer on Compare Match (CTC) mode
@@ -64,8 +75,32 @@ static void update_processed_vals(void) {
     screen_info.pressure_proc = MIDI_map_value(PRESSURE, screen_info.pressure_raw);
     screen_info.gsr_proc = MIDI_map_value(SKIN, screen_info.gsr_raw);
     screen_info.emg_proc = MIDI_map_value(EMG, screen_info.emg_raw);
+    screen_info.pulse_proc = bpm;
+}
 
-    screen_info.pulse_proc = screen_info.pulse_raw;
+static void update_pulse(uint16_t pulse_val, uint32_t now) {
+    // Rising edge
+    if (pulse_val > PULSE_HIGH && last_pulse_val <= PULSE_HIGH) {
+        uint32_t t_interval = now - last_pulse_time;
+        last_pulse_time = now;
+
+        if (t_interval > 300 && t_interval < 2000) {
+            uint16_t updated_bpm = 60000 / t_interval;
+
+            bpm = (bpm * 3 + updated_bpm) / 4; // interpolate between old and new bpm to reduce jumps
+
+            midi_clk_spacing_ms = 60000 / (bpm * 24);
+        }
+    }
+
+    last_pulse_val = pulse_val;
+}
+
+static void update_midi_clk(uint32_t now) {
+    if (now - last_clock_time >= midi_clk_spacing_ms) {
+        last_clock_time = now;
+        send_UART(MIDI_CLOCK);
+    }
 }
 
 static void update_midi_out(void) {
@@ -121,12 +156,15 @@ int main(void) {
             last_sensor_read = now;
             update_raw_vals();
             update_processed_vals();
+            update_pulse(screen_info.pulse_raw, now);
         }
 
         if (now - last_midi_update >= MIDI_UPDATE_MS) {
             last_midi_update = now;
             update_midi_out();
         }
+
+        update_midi_clk(now);
 
         if (now - last_display_update >= DISPLAY_UPDATE_MS) {
             last_display_update = now;

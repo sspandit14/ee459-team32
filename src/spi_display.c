@@ -242,7 +242,7 @@ void spi_display_draw_biometrics(const ScreenInfo* s) {
     uint16_t y = 0;
     spi_display_draw_string(0, y, "BIOMETRICS:", WHITE, GREEN);
     y += F_HEIGHT + 1;
-    draw_label_value(y, "PULSE", s->pulse_proc, WHITE, GREEN);
+    draw_label_value(y, "BPM", s->pulse_proc, WHITE, GREEN);
     y += F_HEIGHT + 1;
     draw_label_value(y, "PRESSURE", s->pressure_proc, WHITE, GREEN);
     y += F_HEIGHT + 1;
