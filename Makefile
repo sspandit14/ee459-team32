@@ -1,5 +1,5 @@
 DEVICE     = atmega328p
-CLOCK      = 9830400
+CLOCK      = 7372800
 PROGRAMMER = -c usbtiny -P usb
 SOURCES    = $(wildcard src/*.c)
 DEBUG_SOURCES = debug/midi_signal_gen_test.c
