@@ -1,11 +1,27 @@
 DEVICE     = atmega328p
-CLOCK      = 9830400 # 7372800
+# CLOCK      = 9830400
+CLOCK      = 7372800
 PROGRAMMER = -c usbtiny -P usb
 SOURCES    = mcu_test.c
-DEBUG_SOURCES = debug/midi_signal_gen_test.c
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
+BUILD ?= basic
 
-SRCS = $(SOURCES)
+ifeq ($(BUILD), basic)
+	SRCS = basic_mcu_test.c
+else ifeq ($(BUILD), all_port)
+	SRCS = all_port_test.c
+else ifeq ($(BUILD), uart)
+	SRCS = midi_uart_test.c
+else ifeq ($(BUILD), spi)
+	SRCS = spi_test.c
+else ifeq ($(BUILD), timer)
+	SRCS = timer_test.c
+else ifeq ($(BUILD), adc)
+	SRCS = adc_test.c
+else
+	SRCS = basic_mcu_test.c
+endif
+
 HEX = main.hex
 
 OBJECTS = $(SRCS:.c=.o)
