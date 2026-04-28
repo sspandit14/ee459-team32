@@ -23,13 +23,25 @@ int main(void) {
     init_UART();
 
     while(1) {
-        send_UART(0xF8); // MIDI Clock
+        // send_UART(0xF8); // MIDI Clock
 
         // MIDI CC
-        send_UART(0xB0);
-        send_UART(0x01);
-        send_UART(0x40);
+        // send_UART(0xB0);
+        // send_UART(0x01);
+        // send_UART(0x40);
 
-        _delay_ms(100);
+        // _delay_ms(100);
+
+        send_UART(0x90);
+        send_UART(60);
+        send_UART(100);
+
+        _delay_ms(1000);
+
+        send_UART(0x80);
+        send_UART(60);
+        send_UART(0);
+
+        _delay_ms(1000);
     }
 }
