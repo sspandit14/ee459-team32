@@ -1,6 +1,6 @@
 DEVICE     = atmega328p
-# CLOCK      = 9830400
-CLOCK      = 7372800
+CLOCK      = 9830400
+# CLOCK      = 7372800
 PROGRAMMER = -c usbtiny -P usb
 SOURCES    = mcu_test.c
 FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0xe0:m
