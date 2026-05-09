@@ -3,7 +3,7 @@
 
 
 #define ADC_LED PD7
-#define SENSOR_CHANNEL 1
+#define SENSOR_CHANNEL 4
 
 static void adc_init(uint8_t channel) {
     ADMUX |= (1 << REFS0); // reference voltage to AVCC
@@ -26,7 +26,7 @@ int main(void) {
         while (ADCSRA & (1 << ADSC)); // wait for conversion to finish
         sensor_in = ADCH;
 
-        if (sensor_in > 500) {
+        if (sensor_in > 300) {
             PORTB |= (1 << ADC_LED);
         } else {
             PORTB &= ~(1 << ADC_LED);
