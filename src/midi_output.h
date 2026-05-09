@@ -11,6 +11,7 @@
 #define EMG 3
 
 #define MIDI_CLOCK 0xF8
+// only ever send to a single controller so channel nibble = 0 (channel 1)
 #define MIDI_CC 0xB0
 #define MIDI_NOTE 0x90
 #define MIDI_NOTE_NUM 60

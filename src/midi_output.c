@@ -28,19 +28,19 @@ MIDI_Message get_MIDI_message(int sensor, int val) {
     switch (sensor) {
         case PRESSURE:
             msg.length = 3;
-            msg.data[0] = MIDI_CC | 0x00;
-            msg.data[1] = 1;
+            msg.data[0] = MIDI_CC;
+            msg.data[1] = 74;
             msg.data[2] = val;
             break;
         case SKIN:
             msg.length = 3;
-            msg.data[0] = MIDI_CC | 0x01;
-            msg.data[1] = 2;
+            msg.data[0] = MIDI_CC;
+            msg.data[1] = 91;
             msg.data[2] = val;
             break;
         case EMG:
             msg.length = 3;
-            msg.data[0] = MIDI_NOTE | 0x00;
+            msg.data[0] = MIDI_NOTE;
             msg.data[1] = MIDI_NOTE_NUM;
             msg.data[2] = val;
             break;
