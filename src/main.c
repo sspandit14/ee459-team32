@@ -43,13 +43,13 @@ static void timer1_init(void) {
     TCCR1B = (1 << WGM12);
 
     TCCR1B |= (1 << CS11) | (1 << CS10); // Prescalar  64
-    OCR1A = 153; // (F_CPU = 9830400 / 64 / 1000) - 1
+    OCR1A = 1151; // (F_CPU = 7372800 / 64 / 100) - 1
 
     TIMSK1 = (1 << OCIE1A);
 }
 
 ISR(TIMER1_COMPA_vect) {
-    ++ms_counter;
+    ms_counter += 10;
 }
 
 static bool is_valid_sensor_read(uint16_t val) {
@@ -116,8 +116,6 @@ static void update_midi_out(void) {
     send_MIDI(&msg);
     msg = get_MIDI_message(EMG, screen_info.emg_midi);
     send_MIDI(&msg);
-
-    // TODO: figure out pulse logic
 }
 
 static void update_display(void) {
